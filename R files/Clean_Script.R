@@ -1,44 +1,25 @@
----
-title: "Hospital Data Coverage Analysis"
-author: "Naveen Prabakar"
-date: "`r Sys.Date()`"
-output: html_document
----
-
-
-```{r}
 #Install Dependencies
 library(tidyverse)
-```
 
-```{r}
 #Load the DataSet
 hospital <- read_csv("Data/Hospitcal_Coverage.csv")
-```
 
-```{r}
 #Convert ZIP and Fips to character
 hospital <- hospital |>
   mutate(
     `Zip Code` = as.character(`Zip Code`),
     `Fips Code` = as.character(`Fips Code`)
   )
-```
 
-```{r}
 #Replace empty strings with NA
 hospital <- hospital |>
   mutate(
     across(where(is.character), ~ na_if(.x, ""))
   )
-```
 
-```{r}
 #Inspect columns
 colnames(hospital)
-```
 
-```{r}
 # Convert Week Ending to Date
 hospital$`Week Ending` <- as.Date(hospital$`Week Ending`)
 
@@ -92,18 +73,10 @@ logical_cols <- c(
   "able_to_maintain_gloves"
 )
 
-hospital[logical_cols] <- lapply(hospital[logical_cols], as.logical)
-
-```
-
-```{r}
 #Cleaned Dataset
 head(hospital)
-```
 
-```{r}
-#Save Cleaned Dataset
+# Save cleaned dataset
 write_csv(hospital, "Data/cleaned_Hospital_Coverage.csv")
 
-```
-
+hospital[logical_cols] <- lapply(hospital[logical_cols], as.logical)
