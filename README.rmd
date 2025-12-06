@@ -1,8 +1,5 @@
 ---
-title: "Hospital Data Coverage Analysis"
-author: "Naveen Prabakar"
-date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 
 
