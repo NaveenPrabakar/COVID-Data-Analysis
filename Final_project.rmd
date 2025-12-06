@@ -98,10 +98,6 @@ hospital <- hospital |> mutate(`Week Ending` = as.Date(`Week Ending`))
 
 ```
 
-```{r}
-#Cleaned Dataset
-head(hospital)
-```
 
 ```{r}
 #Save Cleaned Dataset
@@ -113,7 +109,6 @@ write_csv(hospital, "Data/cleaned_Hospital_Coverage.csv")
 #Use Cleaned Dataset
 hospital <- read_csv("Data/cleaned_Hospital_Coverage.csv")
 colnames(hospital)
-str(hospital)
 ```
 
 ```{r}
@@ -172,18 +167,107 @@ hospital %>%
 
 
 ```{r}
-hospital %>%
+# Top 5 best-supplied states
+best_states <- hospital %>%
   group_by(State) %>%
   summarize(avg_n95 = mean(n95_respirators_days_available, na.rm = TRUE)) %>%
-  ggplot(aes(x = reorder(State, avg_n95), y = avg_n95)) +
-  geom_col(fill = "purple") +
+  arrange(desc(avg_n95)) %>%
+  slice(1:5)
+
+best_states
+
+
+```
+
+```{r}
+# Top 5 worst-supplied states
+worst_states <- hospital %>%
+  group_by(State) %>%
+  summarize(avg_n95 = mean(n95_respirators_days_available, na.rm = TRUE)) %>%
+  arrange(avg_n95) %>%
+  slice(1:5)
+
+worst_states
+
+```
+
+
+
+```{r}
+hospital |>
+  group_by(State) |>
+  summarise(shortage_rate = mean(critical_staffing_shortage_today, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(State, shortage_rate), y = shortage_rate)) +
+  geom_col(fill = "firebrick") +
   coord_flip() +
   labs(
-    title = "Average N95 Respirator Supply (Days) by State",
+    title = "Rate of Critical Staffing Shortages by State",
     x = "State",
-    y = "Days of N95 Supply"
+    y = "Shortage Rate"
+  ) +
+  theme_minimal()
+
+
+```
+
+```{r}
+library(tidyverse)
+
+obtain_vars <- hospital |>
+  select(
+    able_to_obtain_ventilator_supplies,
+    able_to_obtain_ventilator_medications,
+    able_to_obtain_n95_masks,
+    able_to_obtain_PAPRs,
+    able_to_obtain_surgical_masks,
+    able_to_obtain_eye_protection,
+    able_to_obtain_single_use_gowns,
+    able_to_obtain_gloves,
+    able_to_obtain_launderable_gowns
+  ) |>
+  pivot_longer(everything(), names_to = "supply", values_to = "available")
+
+obtain_vars |>
+  group_by(supply) |>
+  summarise(rate = mean(available, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(supply, rate), y = rate)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Rate of Hospitals Able to Obtain Supplies",
+    x = "Supply Type",
+    y = "Proportion of Hospitals"
   ) +
   theme_minimal()
 
 ```
+
+```{r}
+maintain_vars <- hospital |>
+  select(
+    able_to_maintain_ventilator_supplies,
+    able_to_maintain_ventilator_medications,
+    able_to_maintain_PAPRs,
+    able_to_maintain_lab_nasal_pharyngeal_swabs,
+    able_to_maintain_lab_nasal_swabs,
+    able_to_maintain_lab_viral_transport_media
+  ) |>
+  pivot_longer(everything(), names_to = "supply", values_to = "maintainable")
+
+maintain_vars |>
+  group_by(supply) |>
+  summarise(rate = mean(maintainable, na.rm = TRUE)) |>
+  ggplot(aes(x = reorder(supply, rate), y = rate)) +
+  geom_col(fill = "darkgreen") +
+  coord_flip() +
+  labs(
+    title = "Rate of Hospitals Able to Maintain Supplies",
+    x = "Supply Type",
+    y = "Proportion of Hospitals"
+  ) +
+  theme_minimal()
+
+```
+
+
 
