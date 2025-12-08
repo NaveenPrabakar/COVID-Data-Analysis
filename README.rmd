@@ -371,7 +371,6 @@ supply_quartile <- hospital_quart %>%
   group_by(covid_group) %>%
   summarize(avg_n95 = mean(n95_respirators_days_available, na.rm = TRUE))
 
-# bar plot comparing N95 supply across quartiles
 ggplot(supply_quartile, aes(x = factor(covid_group), y = avg_n95)) +
   geom_col(fill = "steelblue") +
   labs(
@@ -382,4 +381,18 @@ ggplot(supply_quartile, aes(x = factor(covid_group), y = avg_n95)) +
   theme_minimal()
 ```
 
-The bar chart compares average N95 supply availability across four levels of COVID hospitalization burden. Surprisingly, the differences between quartiles are minimal: hospitals in both low-burden and high-burden states report roughly the same number of days of N95 supply on hand. This suggests that N95 availability was not strongly affected by rising patient load, at least during the period covered in the dataset. Instead of showing signs of depletion in high-COVID areas, N95 supplies appear to remain relatively stable, indicating that national PPE distribution systems were able to keep pace with demand. This finding aligns with earlier results showing high proportions of hospitals reporting the ability to obtain PPE when needed, reinforcing the idea that N95 supply chains had largely recovered by this stage of the pandemic.
+The bar chart compares average N95 supply across the four COVID burden groups. What stands out is how little the numbers actually change from one quartile to another. Hospitals in the lowest-burden states and the highest-burden states are basically sitting at the same amount of N95 supply. That means higher COVID pressure didn’t noticeably drain N95 inventory during this week. Instead, N95 availability looks pretty steady across the board, which suggests the PPE supply chain was able to keep up with demand. This also lines up with the earlier results showing that almost all hospitals reported being able to obtain N95s when they needed them.
+
+```{r}
+ggplot(hospital, aes(x = State, y = n95_respirators_days_available)) +
+  geom_boxplot(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Variation in N95 Supply Availability Across States",
+    x = "State",
+    y = "Days of N95 Supply Available"
+  ) +
+  theme_minimal()
+```
+
+This boxplot shows how much N95 supply actually varies from state to state. Even though there are a few states with lower numbers, most of them are pretty tightly grouped around 3–4 days of N95 supply. That means hospitals across the country were generally sitting at about the same level of inventory, without any states falling way behind the rest. So based on this view, N95 availability looks fairly steady overall, with only a few places showing noticeably less supply than others.
