@@ -343,6 +343,7 @@ maintain_vars |>
 The second chart evaluates whether hospitals are able to maintain adequate ongoing supplies—not just obtain them once. Here, the rates are slightly lower overall than the “able to obtain” chart, which is expected: maintaining a steady inventory requires consistent supply streams and adequate on-hand stock.
 
 ```{r}
+<<<<<<< HEAD
 df_low_ppe <- hospital %>%
   mutate(
     low_ppe = (
@@ -404,3 +405,76 @@ ggplot(missing_heatmap, aes(x = State, y = 1, fill = avg_missing)) +
     axis.text.x = element_text(angle = 90, vjust = 0.5),
     panel.grid = element_blank()
   )
+=======
+# total covid per state
+covid_quartiles <- hospital %>%
+  group_by(State) %>%
+  summarize(
+    covid_total = sum(
+      total_adult_patients_hospitalized_confirmed_covid +
+        total_pediatric_patients_hospitalized_confirmed_covid,
+      na.rm = TRUE
+    )
+  ) %>%
+  mutate(covid_group = ntile(covid_total, 4))   # split into 4 groups
+
+# add quartile info back to main data
+hospital_quart <- hospital %>%
+  left_join(covid_quartiles, by = "State")
+
+# avg N95 days for each quartile
+supply_quartile <- hospital_quart %>%
+  group_by(covid_group) %>%
+  summarize(avg_n95 = mean(n95_respirators_days_available, na.rm = TRUE))
+
+ggplot(supply_quartile, aes(x = factor(covid_group), y = avg_n95)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Average N95 Supply Availability by COVID Hospitalization Level",
+    x = "COVID Burden Quartile (1 = Low, 4 = High)",
+    y = "Average Days of N95 Supply Available"
+  ) +
+  theme_minimal()
+```
+
+The bar chart compares average N95 supply across the four COVID burden groups. What stands out is how little the numbers actually change from one quartile to another. Hospitals in the lowest-burden states and the highest-burden states are basically sitting at the same amount of N95 supply. That means higher COVID pressure didn’t noticeably drain N95 inventory during this week. Instead, N95 availability looks pretty steady across the board, which suggests the PPE supply chain was able to keep up with demand. This also lines up with the earlier results showing that almost all hospitals reported being able to obtain N95s when they needed them.
+
+```{r}
+ggplot(hospital, aes(x = State, y = n95_respirators_days_available)) +
+  geom_boxplot(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Variation in N95 Supply Availability Across States",
+    x = "State",
+    y = "Days of N95 Supply Available"
+  ) +
+  theme_minimal()
+```
+
+This boxplot shows how much N95 supply actually varies from state to state. Even though there are a few states with lower numbers, most of them are pretty tightly grouped around 3–4 days of N95 supply. That means hospitals across the country were generally sitting at about the same level of inventory, without any states falling way behind the rest. So based on this view, N95 availability looks fairly steady overall, with only a few places showing noticeably less supply than others.
+
+```{r}
+quartile_table <- supply_quartile %>%
+  rename(
+    COVID_Burden_Quartile = covid_group,
+    Avg_N95_Days = avg_n95
+  )
+
+quartile_table
+```
+
+This table shows the average number of days of N95 supply available in each COVID-burden quartile. What stands out is how similar the numbers are across all four groups. Even states in the highest COVID quartile are basically sitting at the same N95 levels as states with the lowest burden. That means heavier COVID pressure didn’t really translate into hospitals running low on N95s during this reporting period. The supply stayed steady across the board, which supports the idea that PPE distribution was stable and able to keep up with demand.
+
+```{r}
+icu_supply_table <- hospital %>%
+  group_by(State) %>%
+  summarize(
+    Avg_ICU_Use = mean(icu_beds_used, na.rm = TRUE),
+    Avg_N95_Days = mean(n95_respirators_days_available, na.rm = TRUE)
+  ) %>%
+  arrange(desc(Avg_ICU_Use))
+
+icu_supply_table
+```
+This table compares two things for each state: how many ICU beds were being used on average, and how many days of N95 supply those same hospitals had on hand. What’s interesting is that even the states with the highest ICU usage are still sitting at roughly the same N95 levels as everyone else. There’s no obvious pattern where higher ICU strain leads to lower PPE availability. Instead, N95 supply looks steady regardless of how busy the ICUs were. That gives the same message as the earlier results, the PPE pipeline was stable enough that even heavy patient loads didn’t push N95 inventories down in any noticeable way.
+>>>>>>> 058f93fb09dd7f22a98c95d4f09ce26d69b6d4dd
