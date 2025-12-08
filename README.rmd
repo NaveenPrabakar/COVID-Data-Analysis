@@ -32,7 +32,6 @@ This dataset contains hospital reporting completeness information collected week
 
 This information is essential for monitoring national hospital capacity, supply readiness, and the overall quality of data used in federal decision-making. Publishing these reports increases transparency and helps ensure hospitals are consistently providing the critical information needed for situational awareness and emergency planning.
 
-
 ```{r, message=FALSE, warning=FALSE}
 #Install Dependencies
 library(tidyverse)
@@ -51,30 +50,29 @@ dim(hospital)
 str(hospital)
 ```
 
-This dataset contains weekly reports from hospitals across the U.S. showing their capacity, resources, and equipment availability during a given reporting period.
-Each row represents one hospital’s report for one week.
+This dataset contains weekly reports from hospitals across the U.S. showing their capacity, resources, and equipment availability during a given reporting period. Each row represents one hospital’s report for one week.
 
-1. Hospital Identification
+1.  Hospital Identification
 
 These columns tell you which hospital the row refers to. State – U.S. state the hospital is in. Facility Name – Name of the hospital. Street Address, City, Zip Code, County – Location information. Fips Code – Geographic code used for counties
 
-2. Reporting Info
+2.  Reporting Info
 
 These describe the timing and quality of the reporting. Week Ending – The date that week’s data ends. Days at 100% – Number of days the hospital reported being at full capacity. Percentage of Required Fields Reported – How complete their report was. Reporting Source / Provider Subtype – Who submitted it and what type of facility it is.
 
-3. Bed Capacity
+3.  Bed Capacity
 
 These fields describe how many beds the hospital has and how many are being used. Common examples from your dataset include: inpatient_beds – Total hospital beds. inpatient_beds_used – Beds currently occupied. icu_beds – Total ICU beds. icu_beds_used – ICU beds currently occupied. adult_icu_bed_utilization – Percent of ICU beds in use. staffed_adult_icu_beds – ICU beds that have staff available. These numbers tell you how strained the hospital is.
 
-4. COVID-Related Metrics
+4.  COVID-Related Metrics
 
 These show the level of COVID burden on the hospital. total_adult_patients_hospitalized_confirmed_covid. inpatient_beds_used_covid. icu_patients_confirmed_covid. These numbers capture COVID’s impact on hospital resources.
 
-5. Equipment Availability
+5.  Equipment Availability
 
 These columns show how many days the hospital has supplies for: n95_respirators_days_available, surgical_masks_days_available, ventilator_supplies_days_available, eye_protection_days_available, PAPR_days_available, single_use_gowns_days_available, ventilator_medications_days_available. These indicate how close a hospital is to running out of critical PPE or equipment.
 
-6. Staffing & Operations
+6.  Staffing & Operations
 
 Some hospitals also report: number_of_travel_nurses_requested, staff_shortage_today, emergency_department_status. These describe operational strain.
 
@@ -157,13 +155,11 @@ hospital <- hospital |> mutate(`Week Ending` = as.Date(`Week Ending`))
 
 ```
 
-
 ```{r}
 #Save Cleaned Dataset
 write_csv(hospital, "Data/cleaned_Hospital_Coverage.csv")
 
 ```
-
 
 The dataset was cleaned to ensure accuracy, consistency, and proper formatting before analysis. ZIP Codes, FIPS Codes, and hospital identifiers were converted to character fields to preserve leading zeros and avoid numeric distortion. Empty strings across all character variables were replaced with NA to correctly represent missing data. All date fields were converted into proper date formats, and numerous hospital capacity, occupancy, and supply-related columns were converted to numeric types so they could be aggregated and analyzed reliably. Several Yes/No fields were also converted into logical values to support clearer interpretation. Finally, the fully cleaned dataset was exported as a new file for reproducibility and further analysis.
 
@@ -235,8 +231,7 @@ hospital %>%
 
 ```
 
-The Bar graphs show the ICU beds used per state. it is directly proportional to the bar graph with the number of hospital admissions for COVID, since those will be the states with the most ICU beds used. The states with the high demand of beds could be the one's that could experience shortage of supplies due to the demand, but they could also be the ones that could have plenty of supplies due to 
-
+The Bar graphs show the ICU beds used per state. it is directly proportional to the bar graph with the number of hospital admissions for COVID, since those will be the states with the most ICU beds used. The states with the high demand of beds could be the one's that could experience shortage of supplies due to the demand, but they could also be the ones that could have plenty of supplies due to
 
 ```{r}
 # Top 5 best-supplied states
@@ -263,9 +258,7 @@ worst_states
 
 ```
 
-The two tables show which states were the best supplied in terms of having respirators versus the worst. An interesting note is that the hospitals with the most patients do not appear in the worst states. Typically busy
-hospitals could experience shortage, but in this case it does not. Rather, the trend seems to be pointing towards hospitals that didn't expect an increase in demand
-
+The two tables show which states were the best supplied in terms of having respirators versus the worst. An interesting note is that the hospitals with the most patients do not appear in the worst states. Typically busy hospitals could experience shortage, but in this case it does not. Rather, the trend seems to be pointing towards hospitals that didn't expect an increase in demand
 
 ```{r}
 hospital |>
@@ -349,3 +342,65 @@ maintain_vars |>
 
 The second chart evaluates whether hospitals are able to maintain adequate ongoing supplies—not just obtain them once. Here, the rates are slightly lower overall than the “able to obtain” chart, which is expected: maintaining a steady inventory requires consistent supply streams and adequate on-hand stock.
 
+```{r}
+df_low_ppe <- hospital %>%
+  mutate(
+    low_ppe = (
+      n95_respirators_days_available < 3 |
+      on_hand_supply_of_surgical_masks_in_days < 3 |
+      on_hand_supply_of_eye_protection_in_days < 3 |
+      on_hand_supply_of_single_use_surgical_gowns_in_days < 3 |
+      on_hand_supply_of_gloves_in_days < 3
+    )
+  ) %>%
+  group_by(State) %>%
+  summarize(
+    percent_low = mean(low_ppe, na.rm = TRUE) * 100,
+    n = n()
+  ) %>%
+  arrange(desc(percent_low))
+
+ggplot(df_low_ppe, aes(x = reorder(State, percent_low), y = percent_low)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  labs(
+    title = "% of Hospitals With < 3 Days of Any PPE Supply",
+    x = "State",
+    y = "Percent of Hospitals (%)"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    axis.text.y = element_text(size = 6),
+    axis.text.x = element_text(size = 6)
+  )
+```
+The chart shows the percentage of hospitals in each U.S. state that reported having fewer than three days’ worth of any essential PPE supply. States are ranked from highest to lowest percentage, allowing a clear comparison of supply vulnerabilities across the country.The states at the top of the chart have the largest share of hospitals with extremely limited PPE reserves, indicating higher supply-chain strain or greater demand surges. As we move down the chart, the percentages decline, showing states where hospitals were better able to maintain adequate PPE inventories.
+
+
+```{r}
+missing_heatmap <- hospital %>%
+  mutate(
+    pct_missing = 100 - (Percentage.of.Required.Fields.Reported * 100)
+  ) %>%
+  group_by(State) %>%
+  summarise(
+    avg_missing = mean(pct_missing, na.rm = TRUE)
+  )
+
+ggplot(missing_heatmap, aes(x = State, y = 1, fill = avg_missing)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "white", high = "red",
+                      name = "% Missing Data") +
+  labs(
+    title = "Average % Missing Data by State",
+    x = "State",
+    y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = 0.5),
+    panel.grid = element_blank()
+  )
