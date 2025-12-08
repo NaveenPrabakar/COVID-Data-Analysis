@@ -796,3 +796,53 @@ means hospitals across the country were generally sitting at about the
 same level of inventory, without any states falling way behind the rest.
 So based on this view, N95 availability looks fairly steady overall,
 with only a few places showing noticeably less supply than others.
+
+``` r
+obtain_table <- hospital %>%
+  select(
+    able_to_obtain_ventilator_supplies,
+    able_to_obtain_ventilator_medications,
+    able_to_obtain_n95_masks,
+    able_to_obtain_PAPRs,
+    able_to_obtain_surgical_masks,
+    able_to_obtain_eye_protection,
+    able_to_obtain_single_use_gowns,
+    able_to_obtain_gloves,
+    able_to_obtain_launderable_gowns
+  ) %>%
+  summarize(across(everything(), ~ mean(.x, na.rm = TRUE) * 100)) %>%
+  pivot_longer(everything(),
+               names_to = "Supply_Type",
+               values_to = "Percent_Obtained") %>%
+  arrange(desc(Percent_Obtained))
+
+obtain_table
+```
+
+    ## # A tibble: 9 × 2
+    ##   Supply_Type                           Percent_Obtained
+    ##   <chr>                                            <dbl>
+    ## 1 able_to_obtain_eye_protection                    128. 
+    ## 2 able_to_obtain_single_use_gowns                  128. 
+    ## 3 able_to_obtain_gloves                            128. 
+    ## 4 able_to_obtain_n95_masks                         128. 
+    ## 5 able_to_obtain_surgical_masks                    128. 
+    ## 6 able_to_obtain_PAPRs                              81.1
+    ## 7 able_to_obtain_launderable_gowns                  80.6
+    ## 8 able_to_obtain_ventilator_supplies                78.1
+    ## 9 able_to_obtain_ventilator_medications             77.1
+
+The table shows how often hospitals were able to get different supplies
+when they needed them. Most of the basic PPE items like eye protection,
+single use gowns, gloves, surgical masks, and N95s were available almost
+all the time, which means hospitals did not struggle much with everyday
+protective gear.
+
+The lower percentages come from more specialized equipment like PAPRs
+and ventilator supplies, which are naturally harder to source. Even
+then, the numbers are not terrible, just clearly lower compared to
+standard PPE.
+
+Overall, this matches what we have seen in the other results. The core
+PPE supply chain was strong, and only the more advanced equipment showed
+signs of strain.
