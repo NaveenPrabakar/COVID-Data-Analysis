@@ -729,3 +729,52 @@ adequate ongoing supplies—not just obtain them once. Here, the rates are
 slightly lower overall than the “able to obtain” chart, which is
 expected: maintaining a steady inventory requires consistent supply
 streams and adequate on-hand stock.
+
+``` r
+# total covid per state
+covid_quartiles <- hospital %>%
+  group_by(State) %>%
+  summarize(
+    covid_total = sum(
+      total_adult_patients_hospitalized_confirmed_covid +
+        total_pediatric_patients_hospitalized_confirmed_covid,
+      na.rm = TRUE
+    )
+  ) %>%
+  mutate(covid_group = ntile(covid_total, 4))   # split into 4 groups
+
+# add quartile info back to main data
+hospital_quart <- hospital %>%
+  left_join(covid_quartiles, by = "State")
+
+# avg N95 days for each quartile
+supply_quartile <- hospital_quart %>%
+  group_by(covid_group) %>%
+  summarize(avg_n95 = mean(n95_respirators_days_available, na.rm = TRUE))
+
+# bar plot comparing N95 supply across quartiles
+ggplot(supply_quartile, aes(x = factor(covid_group), y = avg_n95)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Average N95 Supply Availability by COVID Hospitalization Level",
+    x = "COVID Burden Quartile (1 = Low, 4 = High)",
+    y = "Average Days of N95 Supply Available"
+  ) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+The bar chart compares average N95 supply availability across four
+levels of COVID hospitalization burden. Surprisingly, the differences
+between quartiles are minimal: hospitals in both low-burden and
+high-burden states report roughly the same number of days of N95 supply
+on hand. This suggests that N95 availability was not strongly affected
+by rising patient load, at least during the period covered in the
+dataset. Instead of showing signs of depletion in high-COVID areas, N95
+supplies appear to remain relatively stable, indicating that national
+PPE distribution systems were able to keep pace with demand. This
+finding aligns with earlier results showing high proportions of
+hospitals reporting the ability to obtain PPE when needed, reinforcing
+the idea that N95 supply chains had largely recovered by this stage of
+the pandemic.
