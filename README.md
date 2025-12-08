@@ -798,88 +798,64 @@ So based on this view, N95 availability looks fairly steady overall,
 with only a few places showing noticeably less supply than others.
 
 ``` r
-obtain_table <- hospital %>%
-  select(
-    able_to_obtain_ventilator_supplies,
-    able_to_obtain_ventilator_medications,
-    able_to_obtain_n95_masks,
-    able_to_obtain_PAPRs,
-    able_to_obtain_surgical_masks,
-    able_to_obtain_eye_protection,
-    able_to_obtain_single_use_gowns,
-    able_to_obtain_gloves,
-    able_to_obtain_launderable_gowns
-  ) %>%
-  summarize(across(everything(), ~ mean(.x, na.rm = TRUE) * 100)) %>%
-  pivot_longer(everything(),
-               names_to = "Supply_Type",
-               values_to = "Percent_Obtained") %>%
-  arrange(desc(Percent_Obtained))
+quartile_table <- supply_quartile %>%
+  rename(
+    COVID_Burden_Quartile = covid_group,
+    Avg_N95_Days = avg_n95
+  )
 
-obtain_table
+quartile_table
 ```
 
-    ## # A tibble: 9 × 2
-    ##   Supply_Type                           Percent_Obtained
-    ##   <chr>                                            <dbl>
-    ## 1 able_to_obtain_eye_protection                    128. 
-    ## 2 able_to_obtain_single_use_gowns                  128. 
-    ## 3 able_to_obtain_gloves                            128. 
-    ## 4 able_to_obtain_n95_masks                         128. 
-    ## 5 able_to_obtain_surgical_masks                    128. 
-    ## 6 able_to_obtain_PAPRs                              81.1
-    ## 7 able_to_obtain_launderable_gowns                  80.6
-    ## 8 able_to_obtain_ventilator_supplies                78.1
-    ## 9 able_to_obtain_ventilator_medications             77.1
+    ## # A tibble: 4 × 2
+    ##   COVID_Burden_Quartile Avg_N95_Days
+    ##                   <int>        <dbl>
+    ## 1                     1         3.80
+    ## 2                     2         3.91
+    ## 3                     3         3.88
+    ## 4                     4         3.90
 
-The table shows how often hospitals were able to get different supplies
-when they needed them. Most of the basic PPE items like eye protection,
-single use gowns, gloves, surgical masks, and N95s were available almost
-all the time, which means hospitals did not struggle much with everyday
-protective gear.
-
-The lower percentages come from more specialized equipment like PAPRs
-and ventilator supplies, which are naturally harder to source. Even
-then, the numbers are not terrible, just clearly lower compared to
-standard PPE.
-
-Overall, this matches what we have seen in the other results. The core
-PPE supply chain was strong, and only the more advanced equipment showed
-signs of strain.
+This table shows the average number of days of N95 supply available in
+each COVID-burden quartile. What stands out is how similar the numbers
+are across all four groups. Even states in the highest COVID quartile
+are basically sitting at the same N95 levels as states with the lowest
+burden. That means heavier COVID pressure didn’t really translate into
+hospitals running low on N95s during this reporting period. The supply
+stayed steady across the board, which supports the idea that PPE
+distribution was stable and able to keep up with demand.
 
 ``` r
-staff_table <- hospital %>%
+icu_supply_table <- hospital %>%
   group_by(State) %>%
   summarize(
-    Shortage_Rate = mean(critical_staffing_shortage_today, na.rm = TRUE) * 100
+    Avg_ICU_Use = mean(icu_beds_used, na.rm = TRUE),
+    Avg_N95_Days = mean(n95_respirators_days_available, na.rm = TRUE)
   ) %>%
-  arrange(desc(Shortage_Rate))
+  arrange(desc(Avg_ICU_Use))
 
-staff_table
+icu_supply_table
 ```
 
-    ## # A tibble: 56 × 2
-    ##    State Shortage_Rate
-    ##    <chr>         <dbl>
-    ##  1 MI            2529.
-    ##  2 TN            2306.
-    ##  3 WI            1799.
-    ##  4 IN            1762.
-    ##  5 MT            1465.
-    ##  6 VA            1244.
-    ##  7 NC            1158.
-    ##  8 VI            1150 
-    ##  9 CA             979.
-    ## 10 MD             907.
+    ## # A tibble: 56 × 3
+    ##    State Avg_ICU_Use Avg_N95_Days
+    ##    <chr>       <dbl>        <dbl>
+    ##  1 AL           28           4   
+    ##  2 AS           28           4   
+    ##  3 CT           28           4   
+    ##  4 DE           28           4   
+    ##  5 IN           28           3.99
+    ##  6 RI           28           4   
+    ##  7 SD           28           4   
+    ##  8 VT           28           4   
+    ##  9 WV           28           4   
+    ## 10 CO           28.0         4   
     ## # ℹ 46 more rows
 
-This table shows how often hospitals in each state reported being in a
-critical staffing shortage. Higher numbers mean the state had more
-hospitals repeatedly reporting that they did not have enough staff to
-operate normally. A few states sit far above the rest, which means
-staffing pressure was a real and consistent issue for them throughout
-the reporting period. Other states have much lower rates, suggesting
-that staffing was either stable or only occasionally strained. This
-helps explain which states were actually struggling behind the scenes
-even if their supply levels looked fine, and it adds important context
-to the overall picture of hospital readiness during the pandemic.
+many days of N95 supply those same hospitals had on hand. What’s
+interesting is that even the states with the highest ICU usage are still
+sitting at roughly the same N95 levels as everyone else. There’s no
+obvious pattern where higher ICU strain leads to lower PPE availability.
+Instead, N95 supply looks steady regardless of how busy the ICUs were.
+That gives the same message as the earlier results, the PPE pipeline was
+stable enough that even heavy patient loads didn’t push N95 inventories
+down in any noticeable way.
