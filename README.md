@@ -729,3 +729,74 @@ adequate ongoing supplies—not just obtain them once. Here, the rates are
 slightly lower overall than the “able to obtain” chart, which is
 expected: maintaining a steady inventory requires consistent supply
 streams and adequate on-hand stock.
+
+``` r
+df_low_ppe <- hospital %>%
+  mutate(
+    low_ppe = (
+      n95_respirators_days_available < 3 |
+      on_hand_supply_of_surgical_masks_in_days < 3 |
+      on_hand_supply_of_eye_protection_in_days < 3 |
+      on_hand_supply_of_single_use_surgical_gowns_in_days < 3 |
+      on_hand_supply_of_gloves_in_days < 3
+    )
+  ) %>%
+  group_by(State) %>%
+  summarize(
+    percent_low = mean(low_ppe, na.rm = TRUE) * 100,
+    n = n()
+  ) %>%
+  arrange(desc(percent_low))
+
+ggplot(df_low_ppe, aes(x = reorder(State, percent_low), y = percent_low)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  labs(
+    title = "% of Hospitals With < 3 Days of Any PPE Supply",
+    x = "State",
+    y = "Percent of Hospitals (%)"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    plot.title = element_text(face = "bold", size = 12),
+    axis.text.y = element_text(size = 6),
+    axis.text.x = element_text(size = 6)
+  )
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- --> The chart
+shows the percentage of hospitals in each U.S. state that reported
+having fewer than three days’ worth of any essential PPE supply. States
+are ranked from highest to lowest percentage, allowing a clear
+comparison of supply vulnerabilities across the country.The states at
+the top of the chart have the largest share of hospitals with extremely
+limited PPE reserves, indicating higher supply-chain strain or greater
+demand surges. As we move down the chart, the percentages decline,
+showing states where hospitals were better able to maintain adequate PPE
+inventories.
+
+``` r
+df_missing <- hospital %>%
+  mutate(missing_count = lengths(`Dates with Missing Data`)) %>%
+  group_by(State) %>%
+  summarise(total_missing_dates = sum(missing_count, na.rm = TRUE),
+            hospitals_reporting = n())
+
+ggplot(df_missing, aes(x = State, y = total_missing_dates)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(
+    title = "Total Missing Reporting Dates by State",
+    x = "State",
+    y = "Total Missing Dates"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+This chart shows the total number of missing reporting dates per state,
+with the Y-axis representing total missing dates and the X-axis
+representing states. It provides insight into which states have more
+incomplete hospital reporting, helping identify where it may be more
+challenging to make data-driven decisions.
