@@ -846,3 +846,40 @@ standard PPE.
 Overall, this matches what we have seen in the other results. The core
 PPE supply chain was strong, and only the more advanced equipment showed
 signs of strain.
+
+``` r
+staff_table <- hospital %>%
+  group_by(State) %>%
+  summarize(
+    Shortage_Rate = mean(critical_staffing_shortage_today, na.rm = TRUE) * 100
+  ) %>%
+  arrange(desc(Shortage_Rate))
+
+staff_table
+```
+
+    ## # A tibble: 56 × 2
+    ##    State Shortage_Rate
+    ##    <chr>         <dbl>
+    ##  1 MI            2529.
+    ##  2 TN            2306.
+    ##  3 WI            1799.
+    ##  4 IN            1762.
+    ##  5 MT            1465.
+    ##  6 VA            1244.
+    ##  7 NC            1158.
+    ##  8 VI            1150 
+    ##  9 CA             979.
+    ## 10 MD             907.
+    ## # ℹ 46 more rows
+
+This table shows how often hospitals in each state reported being in a
+critical staffing shortage. Higher numbers mean the state had more
+hospitals repeatedly reporting that they did not have enough staff to
+operate normally. A few states sit far above the rest, which means
+staffing pressure was a real and consistent issue for them throughout
+the reporting period. Other states have much lower rates, suggesting
+that staffing was either stable or only occasionally strained. This
+helps explain which states were actually struggling behind the scenes
+even if their supply levels looked fine, and it adds important context
+to the overall picture of hospital readiness during the pandemic.
