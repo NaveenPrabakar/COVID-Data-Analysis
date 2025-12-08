@@ -851,11 +851,12 @@ icu_supply_table
     ## 10 CO           28.0         4   
     ## # ℹ 46 more rows
 
-many days of N95 supply those same hospitals had on hand. What’s
-interesting is that even the states with the highest ICU usage are still
-sitting at roughly the same N95 levels as everyone else. There’s no
-obvious pattern where higher ICU strain leads to lower PPE availability.
-Instead, N95 supply looks steady regardless of how busy the ICUs were.
-That gives the same message as the earlier results, the PPE pipeline was
-stable enough that even heavy patient loads didn’t push N95 inventories
-down in any noticeable way.
+This table compare two things for each state: how many ICU beds were
+being used on average, and how many days of N95 supply those same
+hospitals had on hand. What’s interesting is that even the states with
+the highest ICU usage are still sitting at roughly the same N95 levels
+as everyone else. There’s no obvious pattern where higher ICU strain
+leads to lower PPE availability. Instead, N95 supply looks steady
+regardless of how busy the ICUs were. That gives the same message as the
+earlier results, the PPE pipeline was stable enough that even heavy
+patient loads didn’t push N95 inventories down in any noticeable way.
