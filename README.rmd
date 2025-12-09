@@ -544,3 +544,7 @@ comparison_table <- hospital %>%
 comparison_table
 ```
 This table allows direct comparison for percentage of hospitals with low PPE (< 3 days) and percentage of reporting current staffing shortages. Across most states, staffing shortages exceed low-PPE shortages.
+
+# Conclusion
+
+After all of our findings, the answer to the question of How consistently were U.S. hospitals able to obtain critical supplies such as N95 masks, PPE, and ventilators during periods of high patient demand, is that the hospitals were well supplied in terms of N95's and PPE and ventilators. From most of our graphs, the mean is very high and close to the max, which indicates there were very few hospitals that experienced shortages. Despite the high number of patients, as evident by the COVID graphs, the hospital did manage to sustain a good amount of supplies. It should be noted that there are instances in the data where hospital updates were not reported. Furthermore, the main problem wasn't supplies; it was workers. There was a shortage of workers across the states. Our final conclusion is that hosptials were well covered in this time period in terms supplies, but certain areas required more hospital workers to manage demand. 
