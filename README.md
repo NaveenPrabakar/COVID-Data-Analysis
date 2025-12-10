@@ -22,14 +22,7 @@ states.
 Investigate supply chain stability, including N95, PPE, ventilator
 supplies, and other critical resources.
 
-Evaluate staffing shortages, a key limiting factor for safe hospital
-operation.
-
-Critically examine surprising results using secondary methods and
-sensitivity checks.
-
-Highlight patterns and insights that inform future research on hospital
-resilience.
+Evaluate staffing shortages
 
 Each section is organized around clear questions, with results supported
 by carefully curated visualizations and tables.
@@ -40,6 +33,11 @@ How consistently were U.S. hospitals able to obtain critical supplies
 such as N95 masks, PPE, and ventilators during periods of high patient
 demand?
 
+Were they shortages in supplies regarding  air related supplies like
+respirators ?
+
+Were there enough workers to manage demand ?
+
 # About the Data
 
 This dataset contains hospital reporting completeness information
@@ -48,13 +46,11 @@ collected weekly by the U.S. Department of Health and Human Services
 States are required to submit operational and capacity data that support
 the federal response to COVID-19. The reporting period covers Friday
 through Thursday, and each row represents a single hospital’s submission
-for that week.
+for that week (04-20-2024).
 
 This information is essential for monitoring national hospital capacity,
 supply readiness, and the overall quality of data used in federal
-decision-making. Publishing these reports increases transparency and
-helps ensure hospitals are consistently providing the critical
-information needed for situational awareness and emergency planning.
+decision-making.
 
 ``` r
 #Install Dependencies
@@ -468,15 +464,13 @@ write_csv(hospital, "Data/cleaned_Hospital_Coverage.csv")
 
 The dataset was cleaned to ensure accuracy, consistency, and proper
 formatting before analysis. ZIP Codes, FIPS Codes, and hospital
-identifiers were converted to character fields to preserve leading zeros
-and avoid numeric distortion. Empty strings across all character
-variables were replaced with NA to correctly represent missing data. All
-date fields were converted into proper date formats, and numerous
-hospital capacity, occupancy, and supply-related columns were converted
-to numeric types so they could be aggregated and analyzed reliably.
-Several Yes/No fields were also converted into logical values to support
-clearer interpretation. Finally, the fully cleaned dataset was exported
-as a new file for reproducibility and further analysis.
+identifiers were converted to character fields. Empty strings across all
+character variables were replaced with NA to correctly represent missing
+data. All date fields were converted into proper date formats, and
+numerous hospital capacity, occupancy, and supply-related columns were
+converted to numeric types. Several Yes/No fields were also converted
+into logical values to support clearer interpretation. Finally, the
+fully cleaned dataset was exported as a new file,
 
 # Graphs & Tables
 
@@ -520,14 +514,13 @@ hospital |>
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 The bar chart compares the total number of hospitalized COVID-19
-patients across U.S. states. A clear pattern emerges: a small group of
-states accounts for a disproportionately large share of COVID-19
-hospitalizations. The top few states—likely those with the largest
-populations or ongoing outbreaks—show totals exceeding 15,000–20,000
-hospitalized patients, dramatically higher than the rest of the country.
-After the top tier, hospitalization totals drop off steadily, forming a
-long downward slope, which suggests that most states have considerably
-lower hospitalization burdens.
+patients across U.S. states.A small group of states accounts for a large
+share of COVID-19 hospitalizations. The top few states—likely those with
+the largest populations or ongoing outbreaks—show totals exceeding
+15,000–20,000 hospitalized patients, dramatically higher than the rest
+of the country. After the top tier, hospitalization totals drop off
+steadily, forming a long downward slope, which suggests that most states
+have considerably lower hospitalization burdens.
 
 ``` r
 hospital %>%
@@ -548,14 +541,13 @@ hospital %>%
 
 ![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-Most states show relatively low and tightly clustered hospitalization
-counts, with medians falling between 0 and 20 patients. This suggests
-that for many hospitals, COVID-19 admissions were consistently low
-during the reporting period. However, several states exhibit much wider
-spreads and noticeably higher medians, indicating greater and more
-persistent hospitalization burdens. The states with longer boxes (larger
-interquartile ranges) or many high-value outliers are those experiencing
-more variable or elevated COVID impacts.
+Most states show low and tightly clustered hospitalization counts, with
+medians falling between 0 and 20 patients. This suggests that for many
+hospitals, COVID-19 admissions were consistently low during the
+reporting period. However, several states exhibit much wider spreads and
+higher medians, indicating greater hospitalization burdens. The states
+with longer boxes (larger interquartile ranges) or many high-value
+outliers are those experiencing more variable or elevated COVID impacts.
 
 ``` r
 hospital %>%
@@ -646,14 +638,13 @@ hospital |>
 ![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 This bar chart shows how frequently hospitals in each state reported
-critical staffing shortages, highlighting one of the most important
-operational pressures on the healthcare system. The states are ordered
-from highest to lowest shortage rate, making it easy to identify where
-staffing strain is most severe.A small group of states stands out with
-exceptionally high shortage rates, with the top state reporting a value
-above 25, indicating widespread staffing challenges across its
-hospitals. Several other states report values between 10 and 20,
-suggesting persistent difficulties maintaining adequate staffing levels.
+critical staffing shortages. The states are ordered from highest to
+lowest shortage rate, making it easy to identify where staffing strain
+is most severe.A small group of states stands out with high shortage
+rates, with the top state reporting a value above 25, indicating
+widespread staffing challenges across its hospitals. Several other
+states report values between 10 and 20, suggesting persistent
+difficulties maintaining adequate staffing levels.
 
 ``` r
 library(tidyverse)
@@ -727,7 +718,7 @@ maintain_vars |>
 The second chart evaluates whether hospitals are able to maintain
 adequate ongoing supplies—not just obtain them once. Here, the rates are
 slightly lower overall than the “able to obtain” chart, which is
-expected: maintaining a steady inventory requires consistent supply
+expected since maintaining a steady inventory requires consistent supply
 streams and adequate on-hand stock.
 
 ``` r
