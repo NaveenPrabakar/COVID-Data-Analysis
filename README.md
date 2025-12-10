@@ -755,16 +755,17 @@ ggplot(df_low_ppe, aes(x = reorder(State, percent_low), y = percent_low)) +
   )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- --> The chart
-shows the percentage of hospitals in each U.S. state that reported
-having fewer than three days’ worth of any essential PPE supply. States
-are ranked from highest to lowest percentage, allowing a clear
-comparison of supply vulnerabilities across the country.The states at
-the top of the chart have the largest share of hospitals with extremely
-limited PPE reserves, indicating higher supply-chain strain or greater
-demand surges. As we move down the chart, the percentages decline,
-showing states where hospitals were better able to maintain adequate PPE
-inventories.
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+The chart shows the percentage of hospitals in each U.S. state that
+reported having fewer than three days’ worth of any essential PPE
+supply. States are ranked from highest to lowest percentage, allowing a
+clear comparison of supply vulnerabilities across the country.The states
+at the top of the chart have the largest share of hospitals with
+extremely limited PPE reserves, indicating higher supply-chain strain or
+greater demand surges. As we move down the chart, the percentages
+decline, showing states where hospitals were better able to maintain
+adequate PPE inventories.
 
 ``` r
 df_missing <- hospital %>%
@@ -818,6 +819,122 @@ ggplot(df_missing, aes(x = State, y = total_missing_dates)) +
     ##  @ complete: logi FALSE
     ##  @ validate: logi TRUE
 
+This chart shows the total number of missing reporting dates per state,
+with the Y-axis representing total missing dates and the X-axis
+representing states. It provides insight into which states have more
+incomplete hospital reporting, helping identify where it may be more
+challenging to make data-driven decisions.
+
+``` r
+df_staff_shortage <- hospital %>%
+  mutate(has_shortage = critical_staffing_shortage_today > 0) %>%
+  group_by(State) %>%
+  summarise(
+    percent_with_shortage = mean(has_shortage, na.rm = TRUE) * 100,
+    n = n()
+  ) %>%
+  arrange(desc(percent_with_shortage))
+
+ggplot(df_staff_shortage, aes(x = reorder(State, percent_with_shortage), y = percent_with_shortage)) +
+  geom_col(fill = "darkred") +
+  coord_flip() +
+  labs(
+    title = "Percent of Hospitals Reporting Critical Staffing Shortages",
+    x = "State",
+    y = "Percent of Hospitals (%)"
+  ) +
+  theme_minimal(base_size = 10)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- --> This graph
+highlights the proportion of hospitals in each state experiencing active
+critical staffing shortages. Unlike PPE or respirator supplies-which
+were close to fully available for most hospitals-staffing shortages show
+far more variability. States at the top of the chart face significant
+manpower constraints, suggesting that human capital, not supplies, may
+be the limiting factor for hospital readiness.
+
+``` r
+df_ppe_days <- hospital %>%
+  mutate(
+    avg_ppe_days = rowMeans(
+      select(
+        .,
+        n95_respirators_days_available,
+        on_hand_supply_of_surgical_masks_in_days,
+        on_hand_supply_of_eye_protection_in_days,
+        on_hand_supply_of_single_use_surgical_gowns_in_days,
+        on_hand_supply_of_gloves_in_days
+      ),
+      na.rm = TRUE
+    )
+  ) %>%
+  group_by(State) %>%
+  summarise(mean_ppe_days = mean(avg_ppe_days, na.rm = TRUE)) %>%
+  arrange(mean_ppe_days)
+
+ggplot(df_ppe_days, aes(x = reorder(State, mean_ppe_days), y = mean_ppe_days)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Average Days of Total PPE Supply by State",
+    x = "State",
+    y = "Average Days of PPE Available"
+  ) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+This visualization summarizes overall PPE availability for each state.
+Most states maintain 3 or more days of PPE on average, suggesting a
+relatively stable supply chain for essential items like N95s, surgical
+masks, gowns, and gloves. A few states fall near or below the 3-day
+threshold, indicating potential vulnerability during periods of high
+demand.
+
+``` r
+comparison_table <- hospital %>%
+  mutate(
+    low_ppe = (
+      n95_respirators_days_available < 3 |
+      on_hand_supply_of_surgical_masks_in_days < 3 |
+      on_hand_supply_of_eye_protection_in_days < 3 |
+      on_hand_supply_of_single_use_surgical_gowns_in_days < 3 |
+      on_hand_supply_of_gloves_in_days < 3
+    ),
+    has_shortage = critical_staffing_shortage_today > 0
+  ) %>%
+  group_by(State) %>%
+  summarise(
+    percent_low_ppe = mean(low_ppe, na.rm = TRUE) * 100,
+    percent_staff_shortage = mean(has_shortage, na.rm = TRUE) * 100,
+    n = n()
+  ) %>%
+  arrange(desc(percent_staff_shortage))
+
+comparison_table
+```
+
+    ## # A tibble: 56 × 4
+    ##    State percent_low_ppe percent_staff_shortage     n
+    ##    <chr>           <dbl>                  <dbl> <int>
+    ##  1 MI              0                       95.7   140
+    ##  2 TN              0                       84.6   104
+    ##  3 IN              0                       73.6   121
+    ##  4 WI              0.781                   70.3   128
+    ##  5 MT              6.45                    64.5    62
+    ##  6 VI              0                       50       2
+    ##  7 VA              0                       44.8    87
+    ##  8 NC              1.85                    43.5   108
+    ##  9 CA              4.76                    37.8   336
+    ## 10 MD              0                       32.6    46
+    ## # ℹ 46 more rows
+
+This table allows direct comparison for percentage of hospitals with low
+PPE (\< 3 days) and percentage of reporting current staffing shortages.
+Across most states, staffing shortages exceed low-PPE shortages.
+
 ``` r
 # total covid per state
 covid_quartiles <- hospital %>%
@@ -850,13 +967,32 @@ ggplot(supply_quartile, aes(x = factor(covid_group), y = avg_n95)) +
   theme_minimal()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
-This chart shows the total number of missing reporting dates per state,
-with the Y-axis representing total missing dates and the X-axis
-representing states. It provides insight into which states have more
-incomplete hospital reporting, helping identify where it may be more
-challenging to make data-driven decisions.
+The bar chart compares average N95 supply across the four COVID burden
+groups. What stands out is how little the numbers actually change from
+one quartile to another. Hospitals in the lowest-burden states and the
+highest-burden states are basically sitting at the same amount of N95
+supply. That means higher COVID pressure didn’t noticeably drain N95
+inventory during this week. Instead, N95 availability looks pretty
+steady across the board, which suggests the PPE supply chain was able to
+keep up with demand. This also lines up with the earlier results showing
+that almost all hospitals reported being able to obtain N95s when they
+needed them.
+
+``` r
+ggplot(hospital, aes(x = State, y = n95_respirators_days_available)) +
+  geom_boxplot(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Variation in N95 Supply Availability Across States",
+    x = "State",
+    y = "Days of N95 Supply Available"
+  ) +
+  theme_minimal()
+```
+
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 This boxplot shows how much N95 supply actually varies from state to
 state. Even though there are a few states with lower numbers, most of
@@ -929,115 +1065,6 @@ leads to lower PPE availability. Instead, N95 supply looks steady
 regardless of how busy the ICUs were. That gives the same message as the
 earlier results, the PPE pipeline was stable enough that even heavy
 patient loads didn’t push N95 inventories down in any noticeable way.
-
-``` r
-df_staff_shortage <- hospital %>%
-  mutate(has_shortage = critical_staffing_shortage_today > 0) %>%
-  group_by(State) %>%
-  summarise(
-    percent_with_shortage = mean(has_shortage, na.rm = TRUE) * 100,
-    n = n()
-  ) %>%
-  arrange(desc(percent_with_shortage))
-
-ggplot(df_staff_shortage, aes(x = reorder(State, percent_with_shortage), y = percent_with_shortage)) +
-  geom_col(fill = "darkred") +
-  coord_flip() +
-  labs(
-    title = "Percent of Hospitals Reporting Critical Staffing Shortages",
-    x = "State",
-    y = "Percent of Hospitals (%)"
-  ) +
-  theme_minimal(base_size = 10)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- --> This graph
-highlights the proportion of hospitals in each state experiencing active
-critical staffing shortages. Unlike PPE or respirator supplies-which
-were close to fully available for most hospitals-staffing shortages show
-far more variability. States at the top of the chart face significant
-manpower constraints, suggesting that human capital, not supplies, may
-be the limiting factor for hospital readiness.
-
-``` r
-df_ppe_days <- hospital %>%
-  mutate(
-    avg_ppe_days = rowMeans(
-      select(
-        .,
-        n95_respirators_days_available,
-        on_hand_supply_of_surgical_masks_in_days,
-        on_hand_supply_of_eye_protection_in_days,
-        on_hand_supply_of_single_use_surgical_gowns_in_days,
-        on_hand_supply_of_gloves_in_days
-      ),
-      na.rm = TRUE
-    )
-  ) %>%
-  group_by(State) %>%
-  summarise(mean_ppe_days = mean(avg_ppe_days, na.rm = TRUE)) %>%
-  arrange(mean_ppe_days)
-
-ggplot(df_ppe_days, aes(x = reorder(State, mean_ppe_days), y = mean_ppe_days)) +
-  geom_col(fill = "steelblue") +
-  coord_flip() +
-  labs(
-    title = "Average Days of Total PPE Supply by State",
-    x = "State",
-    y = "Average Days of PPE Available"
-  ) +
-  theme_minimal()
-```
-
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- --> This
-visualization summarizes overall PPE availability for each state. Most
-states maintain 3 or more days of PPE on average, suggesting a
-relatively stable supply chain for essential items like N95s, surgical
-masks, gowns, and gloves. A few states fall near or below the 3-day
-threshold, indicating potential vulnerability during periods of high
-demand.
-
-``` r
-comparison_table <- hospital %>%
-  mutate(
-    low_ppe = (
-      n95_respirators_days_available < 3 |
-      on_hand_supply_of_surgical_masks_in_days < 3 |
-      on_hand_supply_of_eye_protection_in_days < 3 |
-      on_hand_supply_of_single_use_surgical_gowns_in_days < 3 |
-      on_hand_supply_of_gloves_in_days < 3
-    ),
-    has_shortage = critical_staffing_shortage_today > 0
-  ) %>%
-  group_by(State) %>%
-  summarise(
-    percent_low_ppe = mean(low_ppe, na.rm = TRUE) * 100,
-    percent_staff_shortage = mean(has_shortage, na.rm = TRUE) * 100,
-    n = n()
-  ) %>%
-  arrange(desc(percent_staff_shortage))
-
-comparison_table
-```
-
-    ## # A tibble: 56 × 4
-    ##    State percent_low_ppe percent_staff_shortage     n
-    ##    <chr>           <dbl>                  <dbl> <int>
-    ##  1 MI              0                       95.7   140
-    ##  2 TN              0                       84.6   104
-    ##  3 IN              0                       73.6   121
-    ##  4 WI              0.781                   70.3   128
-    ##  5 MT              6.45                    64.5    62
-    ##  6 VI              0                       50       2
-    ##  7 VA              0                       44.8    87
-    ##  8 NC              1.85                    43.5   108
-    ##  9 CA              4.76                    37.8   336
-    ## 10 MD              0                       32.6    46
-    ## # ℹ 46 more rows
-
-This table allows direct comparison for percentage of hospitals with low
-PPE (\< 3 days) and percentage of reporting current staffing shortages.
-Across most states, staffing shortages exceed low-PPE shortages.
 
 # Conclusion
 
