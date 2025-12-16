@@ -1,4 +1,8 @@
 
+# Group Members:
+
+Naveen Prabakar, Riza Danduro, Ari Martono, Oleksandr Verman
+
 # Introduction
 
 Understanding hospital capacity is essential for evaluating how health
@@ -1082,3 +1086,7 @@ supplies; it was workers. There was a shortage of workers across the
 states. Our final conclusion is that hosptials were well covered in this
 time period in terms supplies, but certain areas required more hospital
 workers to manage demand.
+
+Future future analysis, consider to grab all data across the weekends
+for the time period, then merge the data together to be able to identify
+trends over time as opposed to a week based analysis.

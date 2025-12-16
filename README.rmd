@@ -2,6 +2,9 @@
 output: github_document
 ---
 
+# Group Members:
+Naveen Prabakar, Riza Danduro, Ari Martono, Oleksandr Verman
+
 # Introduction
 
 Understanding hospital capacity is essential for evaluating how health systems respond to sustained pressure from infectious diseases such as COVID-19 and seasonal influenza. During periods of high transmission, hospitals face simultaneous stressors: shortages of ICU beds, limited staffing, constrained supply chains, and wide variation in patient loads across states. These factors influence not only patient outcomes but also public-health decision-making, emergency planning, and resource allocation.
@@ -564,4 +567,6 @@ This table compares two things for each state: how many ICU beds were being used
 # Conclusion
 
 After all of our findings, the answer to the question of How consistently were U.S. hospitals able to obtain critical supplies such as N95 masks, PPE, and ventilators during periods of high patient demand, is that the hospitals were well supplied in terms of N95's and PPE and ventilators. From most of our graphs, the mean is very high and close to the max, which indicates there were very few hospitals that experienced shortages. Despite the high number of patients, as evident by the COVID graphs, the hospital did manage to sustain a good amount of supplies. It should be noted that there are instances in the data where hospital updates were not reported. Furthermore, the main problem wasn't supplies; it was workers. There was a shortage of workers across the states. Our final conclusion is that hosptials were well covered in this time period in terms supplies, but certain areas required more hospital workers to manage demand. 
+
+Future future analysis, consider to grab all data across the weekends for the time period, then merge the data together to be able to identify trends over time as opposed to a week based analysis. 
 
